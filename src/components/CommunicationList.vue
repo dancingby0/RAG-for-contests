@@ -1,11 +1,14 @@
 <script setup lang="ts">
 import {defineProps, onMounted, reactive, watch} from 'vue'
 import {ref} from "vue";
+import {ElMessageBox, ElMessage} from "element-plus";
 import type {Communication} from "@/components/plain_objects/Communication";
 import MessageMore from "@/components/icons/MessageMore.vue";
 
 const props = defineProps<{
   communicationList: Communication[];
+  renameChat: (id: number, title: string) => void;
+  deleteChat: (id: number) => void;
 }>();
 
 // 存取目前选中的对话(-1表示没有选中)
@@ -133,6 +136,56 @@ const hideBigBtnHover = () => {
   bigBtnHover.value = -1;
 }
 
+const mouseAt = ref(-1);
+
+const smallBtnMoreVisible=ref(-1)
+
+const renameChat = (id:number) => {
+  ElMessageBox.prompt('请输入新的名称', 'Tip', {
+    confirmButtonText: '确认',
+    cancelButtonText: '取消',
+    inputPattern:
+        /\S+.*/,
+    inputErrorMessage: '输入不能为空!',
+    // 默认填入原来的名称
+    inputValue: props.communicationList.find((communication) => communication.id == id)?.title
+  })
+      .then(({ value }) => {
+        props.renameChat(id, value)
+        ElMessage({
+          type: 'success',
+          message: '重命名成功',
+        });
+      })
+      .catch(() => {
+        ElMessage({
+          type: 'info',
+          message: '已取消重命名',
+        })
+      })
+}
+
+const deleteChat = (id:number) => {
+  ElMessageBox.confirm('此操作将永久删除该对话, 是否继续?', 'Tip', {
+    confirmButtonText: '确认',
+    cancelButtonText: '取消',
+    type: 'warning',
+  })
+      .then(() => {
+        props.deleteChat(id)
+        ElMessage({
+          type: 'success',
+          message: '删除成功!',
+        });
+      })
+      .catch(() => {
+        ElMessage({
+          type: 'info',
+          message: '已取消删除'
+        });
+      });
+}
+
 </script>
 
 <template>
@@ -147,7 +200,9 @@ const hideBigBtnHover = () => {
         </el-text>
 
 
-        <div v-for="communication in communicationTitleDict.communication.value">
+        <div v-for="communication in communicationTitleDict.communication.value"
+        @mouseenter="mouseAt=communication.id"
+        @mouseleave="mouseAt=-1">
 
           <el-popover
               ref="popoverRef"
@@ -161,12 +216,13 @@ const hideBigBtnHover = () => {
   min-width: 1rem ;
   white-space: normal;
   word-wrap: break-word;
-  text-align: left; "
+  text-align: left;
+"
           >
             <template #default>
               <div
                   class="popover-content"
-                  @mouseenter="hidePopover(communication.id)"
+                  @mouseenter="()=>{hidePopover(communication.id);}"
               >
                 {{ communication.title }}
               </div>
@@ -179,23 +235,40 @@ const hideBigBtnHover = () => {
                     round
                     class="communication-option"
                     :class="{'communication-pressed': selectedCommunication == communication.id,
-                    'communication-hovered': bigBtnHover == communication.id}"
+                    'communication-hovered': bigBtnHover == communication.id&& selectedCommunication!=communication.id}"
                     @click="handleCommunicationClick(communication.id)"
-                    @mouseenter="()=>{delayedShowPopover(communication.id);}"
-                    @mouseleave="()=>{hidePopover(communication.id);}"
+                    @mouseenter="()=>{delayedShowPopover(communication.id)}"
+                    @mouseleave="()=>{hidePopover(communication.id)}"
                 >
                   <div class="btn-content">
                     <span class="text-mask">{{ communication.title }}</span>
                   </div>
                 </el-button>
-                <el-button
-                    :icon="MessageMore"
-                    plain
-                    round
-                    text
-                    class="small-btn"
-                    @mouseenter="hidePopover(communication.id)"
-                ></el-button>
+                <el-popover :width="140" trigger="click"  :teleported="false"  >
+                  <div style="text-align: right; margin: 0">
+                    <el-button size="small" @click="renameChat(communication.id)">
+                      重命名
+                    </el-button>
+                    <el-button size="small" type="danger" @click="deleteChat(communication.id)">
+                      删除
+                    </el-button>
+                  </div>
+                  <template #reference>
+                    <el-button
+                        :icon="MessageMore"
+                        plain
+                        round
+                        text
+                        class="small-btn"
+                        v-show="mouseAt == communication.id"
+                        @mouseenter="()=>{hidePopover(communication.id);showBigBtnHover(communication.id);}"
+                        @mouseleave="()=>{hideBigBtnHover();}"
+                        @click="smallBtnMoreVisible = communication.id"
+                    ></el-button>
+                  </template>
+                </el-popover>
+
+
               </div>
 
             </template>
@@ -249,6 +322,7 @@ const hideBigBtnHover = () => {
   white-space: nowrap;
   overflow: hidden;
   text-overflow: clip;
+
 
   /* 使用 mask-image 让右侧文字渐隐 */
   /* 渐隐效果从 100px 开始 */

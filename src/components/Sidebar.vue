@@ -62,7 +62,7 @@
 
             </el-dialog>
 
-            <CommunicationList :communication-list="chatList"/>
+            <CommunicationList :communication-list="chatList" :renameChat="renameChat" :deleteChat="deleteChat"/>
 
           </div>
         </el-space>
@@ -123,17 +123,32 @@ const resetDialog = () => {
   newChat.value.title = '';  // 清空表单
 };
 
+// 重命名对话
+const renameChat = (id,title) => {
+  const chat = chatList.value.find(chat => chat.id === id);
+  chat.title = title;
+  // 更新时间
+  chat.time = Date.now();
+  localStorage.setItem('chatList', JSON.stringify(chatList.value));
+};
+
+// 删除对话
+const deleteChat = (id) => {
+  const index = chatList.value.findIndex(chat => chat.id === id);
+  chatList.value.splice(index, 1);
+  localStorage.setItem('chatList', JSON.stringify(chatList.value));
+};
+
 // 新建对话
 const createChat = () => {
   if (newChat.value.title) {
-    console.log("aaa")
+    console.log("创建新的对话")
     const newChatData = {
       id: id_next,
       title: newChat.value.title,
         time: Date.now(),  // 获取当前时间(时间戳)
       chatHistory: []  // 初始化对话内容列表为空
     };
-
     id_next += 1;
 
     // 将新对话保存到列表
