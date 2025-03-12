@@ -6,13 +6,13 @@ import type {Communication} from "@/components/plain_objects/Communication";
 import MessageMore from "@/components/icons/MessageMore.vue";
 
 const props = defineProps<{
-  communicationList: Communication[];
+  chatList: Communication[];
   renameChat: (id: number, title: string) => void;
   deleteChat: (id: number) => void;
-}>();
+  selectedChat: number;
+  setSelectedChat: (id: number) => void;
 
-// 存取目前选中的对话(-1表示没有选中)
-const selectedCommunicationIndex = ref(-1)
+}>();
 
 const todayCommunications = ref<Communication[]>([])
 const yesterdayCommunications = ref<Communication[]>([])
@@ -27,7 +27,7 @@ const sevenDaysAgo = now - 7 * 24 * 60 * 60 * 1000;
 const oneMonthAgo = now - 30 * 24 * 60 * 60 * 1000;
 const threeMonthsAgo = now - 90 * 24 * 60 * 60 * 1000;
 
-const clarifyCommunications = (communicationList: Communication[]) => {
+const clarifyCommunications = (chatList: Communication[]) => {
   // 清空各个数组
   todayCommunications.value = []
   yesterdayCommunications.value = []
@@ -37,26 +37,26 @@ const clarifyCommunications = (communicationList: Communication[]) => {
   longLongAgoCommunications.value = []
 
 
-  for (let i = 0; i < communicationList.length; i++) {
-    if (communicationList[i].time > oneDayAgo) {
-      todayCommunications.value.push(communicationList[i])
-    } else if (communicationList[i].time > twoDaysAgo) {
-      yesterdayCommunications.value.push(communicationList[i])
-    } else if (communicationList[i].time > sevenDaysAgo) {
-      lastSevenDaysCommunications.value.push(communicationList[i])
-    } else if (communicationList[i].time > oneMonthAgo) {
-      lastOneMonthCommunications.value.push(communicationList[i])
-    } else if (communicationList[i].time > threeMonthsAgo) {
-      lastThreeMonthsCommunications.value.push(communicationList[i])
+  for (let i = 0; i < chatList.length; i++) {
+    if (chatList[i].time > oneDayAgo) {
+      todayCommunications.value.push(chatList[i])
+    } else if (chatList[i].time > twoDaysAgo) {
+      yesterdayCommunications.value.push(chatList[i])
+    } else if (chatList[i].time > sevenDaysAgo) {
+      lastSevenDaysCommunications.value.push(chatList[i])
+    } else if (chatList[i].time > oneMonthAgo) {
+      lastOneMonthCommunications.value.push(chatList[i])
+    } else if (chatList[i].time > threeMonthsAgo) {
+      lastThreeMonthsCommunications.value.push(chatList[i])
     } else {
-      longLongAgoCommunications.value.push(communicationList[i])
+      longLongAgoCommunications.value.push(chatList[i])
     }
   }
 
   {
     console.log("输出总对话")
-    console.log(communicationList)
-    console.log(communicationList.length)
+    console.log(chatList)
+    console.log(chatList.length)
     console.log("输出今天的对话")
     console.log(todayCommunications.value)
     console.log(todayCommunications.value.length)
@@ -80,18 +80,16 @@ const clarifyCommunications = (communicationList: Communication[]) => {
 }
 
 onMounted(() => {
-  clarifyCommunications(props.communicationList)
+  clarifyCommunications(props.chatList)
 })
 
-watch(() => props.communicationList, (newValue) => {
+watch(() => props.chatList, (newValue) => {
   console.log("watch, 数组更新了")
   clarifyCommunications(newValue)
 }, {deep: true})
 
-const selectedCommunication = ref(-1)
-
 const handleCommunicationClick = (index: number) => {
-  selectedCommunication.value = index
+  props.setSelectedChat(index);
 }
 const CommunicationTitleDictList = [
   {"title": "今天", "communication": todayCommunications},
@@ -148,7 +146,7 @@ const renameChat = (id:number) => {
         /\S+.*/,
     inputErrorMessage: '输入不能为空!',
     // 默认填入原来的名称
-    inputValue: props.communicationList.find((communication) => communication.id == id)?.title
+    inputValue: props.chatList.find((communication) => communication.id == id)?.title
   })
       .then(({ value }) => {
         props.renameChat(id, value)
@@ -234,8 +232,8 @@ const deleteChat = (id:number) => {
                     plain
                     round
                     class="communication-option"
-                    :class="{'communication-pressed': selectedCommunication == communication.id,
-                    'communication-hovered': bigBtnHover == communication.id&& selectedCommunication!=communication.id}"
+                    :class="{'communication-pressed': selectedChat == communication.id,
+                    'communication-hovered': bigBtnHover == communication.id&& selectedChat!=communication.id}"
                     @click="handleCommunicationClick(communication.id)"
                     @mouseenter="()=>{delayedShowPopover(communication.id)}"
                     @mouseleave="()=>{hidePopover(communication.id)}"

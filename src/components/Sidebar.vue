@@ -56,13 +56,15 @@
               <template #footer>
                 <span class="dialog-footer">
         <el-button @click="newDialogVisible = false">取消</el-button>
-        <el-button type="primary" @click="createChat">确定</el-button>
+        <el-button type="primary" @click="createNewChat">确定</el-button>
       </span>
               </template>
 
             </el-dialog>
 
-            <CommunicationList :communication-list="chatList" :renameChat="renameChat" :deleteChat="deleteChat"/>
+            <CommunicationList :chat-list="props.chatList" :renameChat="props.renameChat" :deleteChat="props.deleteChat"
+            :selected-chat="props.selectedChat" :set-selected-chat="props.setSelectedChat"
+            />
 
           </div>
         </el-space>
@@ -73,24 +75,28 @@
 
 
 
-<script setup>
-import {onMounted, ref} from 'vue';
+<script setup lang="ts">
+import { ref,defineProps} from 'vue';
 import SidebarButton from "@/components/icons/SidebarButton.vue";
 import NewMessage from "@/components/icons/NewMessage.vue";
 import CommunicationList from "@/components/CommunicationList.vue";
+import type {Communication} from "@/components/plain_objects/Communication";
 
 // 控制侧边栏折叠状态
 const isCollapsed = ref(false);
-const activeMenu = ref('1'); // 当前选中的菜单项
+
+const props = defineProps<{
+  chatList: Communication[];
+  selectedChat: number;
+  setSelectedChat: (id: number) => void;
+  createChat: (title: string) => void;
+  renameChat: (id: number, title: string) => void;
+  deleteChat: (id: number) => void;
+}>()
 
 // 切换折叠状态
 const toggleSidebar = () => {
   isCollapsed.value = !isCollapsed.value;
-};
-
-// 处理菜单项选择
-const handleSelect = (index) => {
-  activeMenu.value = index;
 };
 
 // 处理对话框
@@ -99,66 +105,18 @@ const newDialogVisible = ref(false);
 // 组件状态
 const formLabelWidth = '80px';     // 表单标签宽度
 const newChat = ref({title: ''}); // 新建对话的表单数据
-const chatList = ref([]);         // 存储用户的对话列表
-
-let id_next;
-
-// 在页面加载时获取本地存储的对话列表
-onMounted(() => {
-  const savedChats = localStorage.getItem('chatList')
-  id_next = localStorage.getItem('id_next')
-  if (savedChats) {
-    chatList.value = JSON.parse(savedChats);  // 从 localStorage 加载对话列表
-  }
-  if(id_next){
-    id_next = JSON.parse(id_next)
-  }
-  else{
-    id_next = 0
-  }
-});
 
 // 重置新建对话表单
 const resetDialog = () => {
   newChat.value.title = '';  // 清空表单
 };
 
-// 重命名对话
-const renameChat = (id,title) => {
-  const chat = chatList.value.find(chat => chat.id === id);
-  chat.title = title;
-  // 更新时间
-  chat.time = Date.now();
-  localStorage.setItem('chatList', JSON.stringify(chatList.value));
-};
-
-// 删除对话
-const deleteChat = (id) => {
-  const index = chatList.value.findIndex(chat => chat.id === id);
-  chatList.value.splice(index, 1);
-  localStorage.setItem('chatList', JSON.stringify(chatList.value));
-};
 
 // 新建对话
-const createChat = () => {
+const createNewChat = () => {
   if (newChat.value.title) {
     console.log("创建新的对话")
-    const newChatData = {
-      id: id_next,
-      title: newChat.value.title,
-        time: Date.now(),  // 获取当前时间(时间戳)
-      chatHistory: []  // 初始化对话内容列表为空
-    };
-    id_next += 1;
-
-    // 将新对话保存到列表
-    chatList.value.push(newChatData);
-
-    // 将对话列表保存到本地存储
-    localStorage.setItem('chatList', JSON.stringify(chatList.value));
-
-    // 将id_next保存到本地存储
-    localStorage.setItem('id_next', JSON.stringify(id_next));
+    props.createChat(newChat.value.title);
 
     // 关闭弹窗并重置表单
     newDialogVisible.value = false;
@@ -174,9 +132,6 @@ const collapseButtonStyles = {
   width: "40px",
   height: "40px",
   fontSize: "28px"
-}
-const newMessageButtonStyles = {
-  backgroundColor: "rgb(219 234 254)"
 }
 </script>
 
