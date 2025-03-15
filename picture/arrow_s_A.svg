@@ -1,0 +1,10 @@
+<?xml version="1.0"?>
+<svg width="640" height="480" xmlns="http://www.w3.org/2000/svg" xmlns:svg="http://www.w3.org/2000/svg">
+ <!-- Created with SVG-edit - https://github.com/SVG-Edit/svgedit-->
+ <g class="layer">
+  <title>Layer 1</title>
+  <line fill="none" id="svg_2" stroke="#000000" transform="rotate(-27.0386 274.33 214.83)" x1="113.33" x2="435.33" y1="214.33" y2="215.33"/>
+  <path d="m407.2,154.6l20.69,8.65l-29.86,-3.2l11.48,-27.75l-2.3,22.3z" fill="none" id="svg_3" stroke="#000000" transform="rotate(-175.158 412.956 147.772)"/>
+  <text fill="#000000" font-family="Serif" font-size="24" id="svg_5" stroke="#000000" stroke-width="0" style="cursor: move;" text-anchor="middle" transform="rotate(-27.2189 269.832 206.843) matrix(0.58731 0 0 0.743094 137.509 55.8078)" x="225.3" xml:space="preserve" y="211.71">服务器到RAG客户端A</text>
+ </g>
+</svg>

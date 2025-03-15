@@ -1,0 +1,10 @@
+<?xml version="1.0"?>
+<svg width="640" height="480" xmlns="http://www.w3.org/2000/svg" xmlns:svg="http://www.w3.org/2000/svg">
+ <!-- Created with SVG-edit - https://github.com/SVG-Edit/svgedit-->
+ <g class="layer">
+  <title>Layer 1</title>
+  <line fill="none" id="svg_2" stroke="#000000" x1="113.33" x2="435.33" y1="214.33" y2="215.33"/>
+  <path d="m438.71,215.91l-13.37,-18l24.04,18l-24.04,18l13.37,-18z" fill="none" id="svg_3" stroke="#000000"/>
+  <text fill="#000000" font-family="Serif" font-size="24" id="svg_5" stroke="#000000" stroke-width="0" text-anchor="middle" transform="matrix(0.58731 0 0 0.743094 137.509 55.8078)" x="242.33" xml:space="preserve" y="206.33">前端到服务器</text>
+ </g>
+</svg>
