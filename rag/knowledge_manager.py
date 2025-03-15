@@ -3,7 +3,7 @@ import os
 
 def add_knowledge_to_file(knowledge_text):
     """向知识库文件添加新的知识"""
-    file_path = "d:/pathonpro/pythonProject6/RAG本地运行/example.txt"
+    file_path = r"D:\DUT\freshterm\science_creation\信息安全竞赛\web\rag\example.txt"
 
     try:
         # 确保目录存在
@@ -22,7 +22,7 @@ def add_knowledge_to_file(knowledge_text):
 
 def view_knowledge():
     """查看当前知识库内容"""
-    file_path = "d:/pathonpro/pythonProject6/RAG本地运行/example.txt"
+    file_path = r"D:\DUT\freshterm\science_creation\信息安全竞赛\web\rag\example.txt"
 
     try:
         with open(file_path, "r", encoding="utf-8") as f:

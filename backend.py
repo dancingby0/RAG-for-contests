@@ -41,8 +41,8 @@ async def handle_connection(websocket, path):
                 print(f"收到大模型的回答: {message}")
                 answers.append(message)
 
-                # 如果收到 3 个回答，停止接收
-                if len(answers) >= 3:
+                # 如果收到 2 个回答，停止接收
+                if len(answers) >= 2:
                     break
             if frontend_connection and answers:
                 await frontend_connection.send("at_server")
