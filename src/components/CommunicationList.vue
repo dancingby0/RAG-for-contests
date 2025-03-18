@@ -231,7 +231,7 @@ const deleteChat = (id:number) => {
                     text
                     plain
                     round
-                    class="communication-option"
+                    class="communication-option"fffffffcb vvnjvvvvbvvnjxgmdvvvvvvvvvxmgddddddddddvvvvxndsgjjjjjjjsdsgjmvff vcbndxsjgrmhhv
                     :class="{'communication-pressed': selectedChat == communication.id,
                     'communication-hovered': bigBtnHover == communication.id&& selectedChat!=communication.id}"
                     @click="handleCommunicationClick(communication.id)"
