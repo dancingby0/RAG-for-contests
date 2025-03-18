@@ -3,7 +3,7 @@
            :selected-chat="selectedChat" :set-selected-chat="setSelectedChat"
            :create-chat="createChat"
   />
-  <RAGAnimation :stage="stage" :content="content" />
+  <RAGAnimation :stage="stage" :content="content" :set-content="setContent" :set-stage="setContent" :trigger-stage8="triggerStage8" />
   <Chat :selected-chat="selectedChat" :chat-list="chatList" :set-selected-chat="setSelectedChat" :send-message="sendMessage" />
 </template>
 
@@ -15,18 +15,53 @@ import Chat from "@/components/Chat.vue";
 import {onMounted, ref} from 'vue';
 
 const stage = ref(1);
+const setStage = (new_stage:number) => {
+  stage.value = new_stage;
+};
+const triggerStage8 = () => {
+  // 将content[0]的内容添加到chatList中
+  const chat = chatList.value.find(chat => chat.id == selectedChat.value);
+  chat?.chatHistory.push({id: 1, cont: content.value[0]});
+  localStorage.setItem('chatList', JSON.stringify(chatList.value));
+  // 等待1s,设置stage为9
+  setTimeout(() => {
+    setStage(1);
+    setContent([])
+  }, 1000);
+};
+const setContent = (new_content:Array<string>) => {
+  content.value = new_content;
+};
 const content = ref<Array<string>>([]);
-const chatList = ref([]);         // 存储用户的对话列表
+const chatList = ref<{ id: number; chatHistory: { id: number; cont: string }[];title:string;time:number; }[]>([]);         // 存储用户的对话列表
 const id_next = ref(0);
 const selectedChat = ref(-1);     // 当前选中的对话
 const message = ref('');          // 当前输入的消息
 const sendMessage = (new_message:string) => {
   message.value = new_message;
   // 保存到对话列表
-  chatList.value.find(chat => chat.id == selectedChat.value).chatHistory.push({id: 2, cont: message.value});
-  localStorage.setItem('chatList', JSON.stringify(chatList.value));
+  const chat =  chatList.value.find(chat => chat.id == selectedChat.value);
+  if(chat){
+    chat.chatHistory.push({id: 2, cont: message.value});
+    chat.time = Date.now();
+    localStorage.setItem('chatList', JSON.stringify(chatList.value));
+  }
   stage.value = 2;
   content.value = [message.value];
+  // 向后端/api/send 发送消息 POST方法
+  fetch('/api/send', {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json'
+    },
+    body: JSON.stringify({
+      message: message.value
+    })
+  })
+    .then(response => response.json())
+    .catch((error) => {
+      console.error('Error:', error);
+    });
 };
 
 // 在页面加载时获取本地存储的对话列表
@@ -42,13 +77,9 @@ onMounted(() => {
   }
 });
 
-// 设置对话列表
-const setChatList = (id:number,list:Array<any>) => {
-  chatList.value.find(chat=>chat.id==id).chatHistory = list
-};
 // 重命名对话
 const renameChat = (id:number,title:string) => {
-  const chat = chatList.value.find(chat => chat.id === id);
+  const chat = chatList.value.find(chat => chat.id === id)!;
   chat.title = title;
   // 更新时间
   chat.time = Date.now();

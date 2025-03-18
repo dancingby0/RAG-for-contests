@@ -6,6 +6,9 @@ import AnimationSVG from "@/components/icons/AnimationSVG.vue";
 const props = defineProps<{
   stage: number;
   content: Array<any>;
+  setStage: (new_stage: number) => void;
+  setContent: (new_content: Array<string>) => void;
+  triggerStage8: () => void;
 }>()
 
 let socket = new WebSocket(SERVER_URL + '/api/ws/animation');
@@ -15,14 +18,21 @@ onMounted(() => {
   };
   socket.onmessage = (event) => {
     const data = JSON.parse(event.data);
-    stage.value = data.stage;
-    content.value = data.content;
+    props.setStage(data.stage);
+    props.setContent(data.content);
   };
   socket.onclose = () => {
     console.log('WebSocket closed');
   };
   socket.addEventListener('open', function (event) {
     socket.send('Animation connected');
+  });
+
+  // 接受到消息后,设置stage和content
+  socket.addEventListener('message', function (event) {
+    const data = JSON.parse(event.data);
+    props.setStage(data.stage);
+    props.setContent(data.content);
   });
 });
 
